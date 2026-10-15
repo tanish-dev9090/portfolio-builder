@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portfolio Builder</title>
+<style>
+:root{--bg:#f6f4ef;--ink:#1d2433;--mute:#5b6577;--line:#d9d5cb;--acc:#1f4fd8;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Georgia,'Times New Roman',serif;background:var(--bg);color:var(--ink);line-height:1.6}
+h1,h2,h3,label,button,input,textarea,select,.ui{font-family:system-ui,-apple-system,'Segoe UI',sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:32px 20px}
+header h1{font-size:2.2rem;margin:0 0 4px}
+header p{color:var(--mute);margin:0 0 28px;font-family:system-ui,sans-serif}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px}
+.panel h2{margin:0 0 14px;font-size:1.1rem}
+.tpls{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px}
+.tpl{border:2px solid var(--line);border-radius:8px;padding:10px;cursor:pointer;background:#fff;text-align:left}
+.tpl.on{border-color:var(--acc);background:#eef2ff}
+.sw{height:34px;border-radius:5px;margin-bottom:6px}
+.tpl span{font-size:.85rem;font-weight:600}
+label{display:block;font-size:.85rem;font-weight:600;margin:12px 0 4px}
+input,textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;font-size:.95rem}
+input:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+textarea{min-height:70px;resize:vertical}
+.row{display:flex;gap:10px;margin-top:18px;flex-wrap:wrap}
+button.btn{background:var(--acc);color:#fff;border:0;border-radius:6px;padding:10px 16px;font-size:.95rem;cursor:pointer;font-weight:600}
+button.alt{background:#fff;color:var(--ink);border:1px solid var(--line)}
+.share{margin-top:16px;display:none}
+.share input{font-size:.8rem}
+#preview{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+/* portfolio templates */
+.pf{padding:44px 30px;min-height:420px}
+.pf h1{font-size:2.4rem;margin:0}
+.pf .role{font-size:1.1rem;margin:2px 0 18px}
+.pf h3{margin:26px 0 8px;font-size:1rem}
+.pf .chips span{display:inline-block;padding:4px 12px;margin:0 6px 6px 0;border-radius:20px;font-size:.85rem;font-family:system-ui,sans-serif}
+.pf a{color:inherit}
+.t-classic{background:#fff;color:#1d2433}
+.t-classic h1{font-family:Georgia,serif}.t-classic .chips span{background:#eef2ff;color:#1f4fd8}
+.t-classic h3{border-bottom:1px solid #d9d5cb;padding-bottom:4px}
+.t-dark{background:#12151c;color:#e8ebf2}
+.t-dark .chips span{background:#232a3a;color:#9fc0ff}.t-dark .role{color:#9fc0ff}
+.t-dark h3{color:#9fc0ff}
+.t-bold{background:#ffd84d;color:#161616}
+.t-bold h1{font-size:3rem;text-transform:uppercase;letter-spacing:-1px}
+.t-bold .chips span{background:#161616;color:#ffd84d}
+.view .wrap{max-width:760px}
+.view #preview{border:0}
+.foot{text-align:center;font-family:system-ui,sans-serif;font-size:.85rem;color:var(--mute);margin-top:18px}
+.foot a{color:var(--acc)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const TEMPLATES={classic:{n:'Classic',c:'#ffffff;border:1px solid #d9d5cb'},dark:{n:'Dark',c:'#12151c'},bold:{n:'Bold',c:'#ffd84d'}};
+const FIELDS=[['name','Full name','text'],['role','Title or role','text'],['about','About you','area'],['skills','Skills (comma separated)','text'],['projects','Projects (one per line)','area'],['email','Email','text'],['github','GitHub URL','text'],['linkedin','LinkedIn URL','text']];
+const app=document.getElementById('app');
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let state={tpl:'classic',name:'Tanish Grover',role:'B.Tech CSE (AI) Student',about:'I am a first-year student who enjoys building things with code and exploring generative AI.',skills:'HTML, CSS, JavaScript, Python, Generative AI',projects:'Online portfolio builder\nSmart India Hackathon admin dashboard',email:'',github:'',linkedin:''};
+
+function encode(o){return btoa(unescape(encodeURIComponent(JSON.stringify(o))))}
+function decode(s){return JSON.parse(decodeURIComponent(escape(atob(s))))}
+
+function portfolio(d){
+  const skills=d.skills.split(',').map(s=>s.trim()).filter(Boolean);
+  const projects=d.projects.split('\n').map(s=>s.trim()).filter(Boolean);
+  const links=[d.email&&`<a href="mailto:${esc(d.email)}">${esc(d.email)}</a>`,d.github&&`<a href="${esc(d.github)}" target="_blank" rel="noopener">GitHub</a>`,d.linkedin&&`<a href="${esc(d.linkedin)}" target="_blank" rel="noopener">LinkedIn</a>`].filter(Boolean);
+  return `<div class="pf t-${esc(d.tpl)}">
+    <h1>${esc(d.name)||'Your name'}</h1><div class="role">${esc(d.role)}</div>
+    ${d.about?`<h3>About</h3><p>${esc(d.about)}</p>`:''}
+    ${skills.length?`<h3>Skills</h3><div class="chips">${skills.map(s=>`<span>${esc(s)}</span>`).join('')}</div>`:''}
+    ${projects.length?`<h3>Projects</h3><ul>${projects.map(p=>`<li>${esc(p)}</li>`).join('')}</ul>`:''}
+    ${links.length?`<h3>Contact</h3><p>${links.join(' &nbsp;|&nbsp; ')}</p>`:''}
+  </div>`;
+}
+
+function renderBuilder(){
+  app.innerHTML=`<header><h1>Portfolio Builder</h1><p>Pick a template, fill in the form, and get a link to your portfolio page.</p></header>
+  <div class="grid"><div class="panel">
+    <h2>1. Choose a template</h2><div class="tpls" id="tpls"></div>
+    <h2>2. Fill in your details</h2><div id="form"></div>
+    <div class="row"><button class="btn" id="gen">Generate shareable link</button><button class="btn alt" id="open">Open portfolio page</button></div>
+    <div class="share" id="share"><label for="link">Your shareable link</label><input id="link" readonly><div class="row"><button class="btn alt" id="copy">Copy link</button></div></div>
+  </div>
+  <div class="panel"><h2>Live preview</h2><div id="preview"></div></div></div>`;
+  const tp=document.getElementById('tpls');
+  Object.entries(TEMPLATES).forEach(([k,t])=>{
+    const b=document.createElement('button');b.className='tpl'+(state.tpl===k?' on':'');b.type='button';
+    b.innerHTML=`<div class="sw" style="background:${t.c}"></div><span>${t.n}</span>`;
+    b.onclick=()=>{state.tpl=k;[...tp.children].forEach(c=>c.classList.remove('on'));b.classList.add('on');update()};
+    tp.appendChild(b);
+  });
+  const f=document.getElementById('form');
+  FIELDS.forEach(([k,l,t])=>{
+    const id='f_'+k;
+    f.insertAdjacentHTML('beforeend',`<label for="${id}">${l}</label>`+(t==='area'?`<textarea id="${id}"></textarea>`:`<input id="${id}">`));
+    const el=document.getElementById(id);el.value=state[k];
+    el.oninput=()=>{state[k]=el.value;update()};
+  });
+  const url=()=>location.origin+location.pathname+'#p='+encode(state);
+  document.getElementById('gen').onclick=()=>{document.getElementById('link').value=url();document.getElementById('share').style.display='block'};
+  document.getElementById('open').onclick=()=>{window.open(url(),'_blank')};
+  document.getElementById('copy').onclick=async e=>{const v=document.getElementById('link').value;try{await navigator.clipboard.writeText(v);e.target.textContent='Copied'}catch{document.getElementById('link').select()}};
+  update();
+}
+function update(){document.getElementById('preview').innerHTML=portfolio(state)}
+
+function renderView(d){
+  document.title=(d.name||'Portfolio')+' | Portfolio';
+  app.className='wrap';document.body.classList.add('view');
+  app.innerHTML=`<div id="preview">${portfolio(d)}</div><div class="foot">Built with <a href="${location.pathname}">Portfolio Builder</a>. Make your own.</div>`;
+}
+
+function route(){
+  const m=location.hash.match(/^#p=(.+)$/);
+  if(m){try{return renderView(decode(m[1]))}catch(e){}}
+  document.body.classList.remove('view');renderBuilder();
+}
+window.addEventListener('hashchange',route);route();
+</script>
+</body>
+</html>
