@@ -2,7 +2,7 @@
 
 A site builder where users pick a template, fill in a form, and get a shareable portfolio page.
 
-**Live demo:** (paste your Vercel link here)
+**Live demo:** https://tanish-grover.vercel.app
 
 ## Features
 1. **Template choice** - Classic, Dark and Bold templates, switchable with a live preview.
